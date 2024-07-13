@@ -1,0 +1,11 @@
+[package]
+name = "nis1336-schedule-core"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+sha-crypt = "0.5"
+chrono = { version = "0.4", features = ["serde"] }
+sled = "0.34"
+bincode = "1"
+serde = { version = "1", features = ["derive"] }
