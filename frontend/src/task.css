@@ -1,0 +1,36 @@
+#schedule-task-meta {
+    height: 32px;
+    padding: 16px 32px 0px;
+}
+
+#schedule-task-title {
+    min-height: 64px;
+    padding: 0 32px;
+}
+
+#schedule-task-content {
+    flex: 1;
+    padding: 0px 40px;
+    overflow: hidden;
+}
+
+#schedule-task-category {
+    height: 32px;
+    padding: 8px 24px;
+}
+
+#schedule-task-title-box {
+    border: none;
+    outline: none; 
+    height: 48px;
+    font-size: x-large;
+}
+
+#schedule-task-content-box { 
+    border: none;
+    outline: none; 
+    resize: none;
+    height: 100%;
+    width: 100%;
+    font-size: large;
+}

@@ -1,0 +1,22 @@
+#schedule-filter-bar {
+    padding: 32px;
+}
+
+#schedule-taskadder-bar {
+    padding: 8px 32px;
+}
+
+#schedule-task-list {
+    padding: 8px 32px;
+}
+
+.task-selected {
+    background-color: #f8f8f8;
+}
+
+.task {
+    transition: background-color .5s;
+}
+.task:hover {
+    background-color: #eeeeee;
+}
