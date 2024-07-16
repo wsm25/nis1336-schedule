@@ -5,23 +5,26 @@ import {
   Input, List, Checkbox, 
   message, } from 'antd'
 import { UnorderedListOutlined, CloseOutlined } from '@ant-design/icons'
-import dayjs from 'dayjs';
+import * as backend from './backend'
 
-import { Filter, pris } from './backend'
+import { pris } from './backend'
 
 import './list.css'
 import { priFlags } from './design';
 
 // require: filter, updateFilter, remote categories
 const FilterBar = ({ctx}) => {
-  var [filter, setFilter] = useState(new Filter());
-  console.log("[Hook] filter reloaded");
+  // console.log("[Hook] filter reloaded");
   const modFilter = (field, value)=>{
-    filter[field]=value;
-    console.log("filter is now", filter);
-    setFilter(filter);
+    ctx.filter[field]=value;
+    ctx.setFilter(ctx.filter);
+    backend.gettasks(ctx).then(
+      (tasks)=>{
+        ctx.setTasks(tasks);
+      }
+    )
   }
-  const [cat, setCat_] = useState(filter.category);
+  const [cat, setCat_] = useState(ctx.filter.category);
   const setCat = (cat)=>{setCat_(cat); modFilter('category', cat)};
   var categoryitems = []
   for (const category of ctx.cats) {
@@ -40,7 +43,7 @@ const FilterBar = ({ctx}) => {
         </Button>
       </Dropdown>
 
-      <DatePicker onChange={(date)=>{modFilter('date', date)}}/>
+      <DatePicker onChange={(_, date)=>{modFilter('date', date=="" ? undefined : date)}}/>
 
       <Select 
         placeholder="优先级"
@@ -55,7 +58,7 @@ const FilterBar = ({ctx}) => {
 
 // only filter will rerender all tasks
 const TasksList = ({ctx}) =>{
-  console.log("[Hook] task list reloaded");
+  // console.log("[Hook] task list reloaded");
   const TaskItem = memo(({task})=>{return (
     <List.Item 
       key={task.id} 
@@ -63,13 +66,16 @@ const TasksList = ({ctx}) =>{
       className={ctx.currentTask ? (ctx.currentTask.id==task.id ? "task-selected task" : "task") : "task"}
     >
       <Space>
-        <Checkbox onClick={(e)=>{
-          if(ctx.currentTask && task.id==ctx.currentTask.id) {
-            ctx.setCurrentTask(undefined);
-          }
-          ctx.delTask(task);
-          e.stopPropagation();
-          }}/>
+        <Checkbox 
+          onClick={(e)=>{
+            if(ctx.currentTask && task.id==ctx.currentTask.id) {
+              ctx.setCurrentTask(undefined);
+            }
+            ctx.delTask(task);
+            e.stopPropagation();
+          }}
+          className={"checkbox-"+task.priority}
+        />
         {task.title}
       </Space>
     </List.Item>
@@ -102,7 +108,7 @@ const TaskAdder = ({ctx}) => {
 
 // require: cat
 const ListEle = ({ctx}) => {
-  console.log("[Hook] list element reloaded");
+  // console.log("[Hook] list element reloaded");
   return (<>
     <div id="schedule-filter-bar"><FilterBar ctx={ctx}/></div>
     <div id="schedule-taskadder-bar"><TaskAdder ctx={ctx}/></div>

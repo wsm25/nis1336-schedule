@@ -5,14 +5,14 @@
 import { Checkbox, Divider, DatePicker, Button, AutoComplete, Input, TimePicker, Dropdown, Space } from 'antd';
 import './task.css'
 import { pris } from './backend'
-import { priFlags } from './design';
+import { priFlags, priColor } from './design';
 import { UnorderedListOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useState } from 'react';
 
 // require: cat_state
 const Task = ({ctx}) => {
-  console.log("[Hook] task reloaded");
+  // console.log("[Hook] task reloaded");
   let task = ctx.currentTask;
   if (!task) {return <></>;}
   // cats
@@ -21,9 +21,7 @@ const Task = ({ctx}) => {
     cats.push({value: cat, label: cat});
   // cat
   function submitCat(cat){
-    console.log("submit cat", cat);
     if (cat && !ctx.cats.includes(cat)){
-      console.log("inserting new cat", cat);
       ctx.cats.push(cat);
       ctx.setCats(ctx.cats);
     }
@@ -34,7 +32,6 @@ const Task = ({ctx}) => {
   const priItems=pris.map(({key, label})=>({
     key,
     label: <a key={key} onClick={()=>{
-      console.log("priority set to", key);
       task.priority=key;
       ctx.modTask(task);
     }}><Space>{priFlags[key]}{label}</Space></a>
@@ -56,23 +53,28 @@ const Task = ({ctx}) => {
   };
   return (<>
     <div id="schedule-task-meta"  key={"taskdetail"+task.id}>
-        <Checkbox onClick={()=>{
-          ctx.delTask(task);
-          ctx.setCurrentTask(undefined);
-        }}/>
+        <Checkbox 
+          onClick={()=>{
+            ctx.delTask(task);
+            ctx.setCurrentTask(undefined);
+          }}
+          className={"checkbox-"+task.priority}
+        />
         <Divider type="vertical" />
         <DatePicker 
           onChange={(_, date)=>{
-            task.date=date;
+            task.date= date=="" ? undefined : date;
             ctx.setCurrentTask(task);
+            ctx.modTaskLazy(task);
           }} 
           defaultValue={task.date?dayjs(task.date):undefined}
         />
         <Divider type="vertical" />
         <TimePicker  
           onChange={(_, time)=>{
-            task.time=time;
+            task.time= time=="" ? undefined : time;
             ctx.setCurrentTask(task);
+            ctx.modTaskLazy(task);
           }}
           defaultValue={task.time?dayjs(task.time, "HH:mm:ss"):undefined}
         />

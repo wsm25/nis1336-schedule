@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { Button, Checkbox, Form, Input, Col, Row } from 'antd';
+import { Button, Input, Col, Row } from 'antd';
 
 import './auth.css'
+import * as backend from './backend'
 
 const AuthCore = ({ctx}) => {
   const [username, setUsername]=useState("");
   const [password, setPassword]=useState("");
+  function usernameInvalid(){
+    return username.length==0;
+  }
   function passwordInvalid(){
-    return password.length!=0 && password.length<8;
+    return password.length<8;
   }
   return (<>
       <Row gutter={[0, 24]}>
@@ -16,7 +20,11 @@ const AuthCore = ({ctx}) => {
         <Col span={6} className="schedule-auth-lable">用户名</Col>
         <Col span={1}/>
         <Col span={14}>
-          <Input value={username} onChange={(e)=>{setUsername(e.target.value);}}/>
+          <Input 
+            value={username} 
+            onChange={(e)=>{setUsername(e.target.value);}}
+            status={usernameInvalid() ? "error" : undefined}
+          />
         </Col>
         <Col span={3}/>
 
@@ -34,8 +42,40 @@ const AuthCore = ({ctx}) => {
         <Col span={3}/>
 
         <Col span={7}/>
-        <Col span={6}><Button type="primary">登录</Button></Col>
-        <Col span={6}><Button type="default">注册</Button></Col>
+        <Col span={6}>
+          <Button 
+            type="primary"
+            onClick={()=>{
+              if(passwordInvalid() || usernameInvalid()) {
+                ctx.messageApi.error("非法用户名或密码");
+                return;
+              }
+              backend.login(ctx, username, password).then(
+                ()=>{ctx.messageApi.info("登录成功");},
+                ({message})=>{},
+              )
+            }}
+          >
+            登录
+          </Button>
+        </Col>
+        <Col span={6}>
+          <Button 
+            type="default"
+            onClick={()=>{
+              if(passwordInvalid() || usernameInvalid()) {
+                ctx.messageApi.error("非法用户名或密码");
+                return;
+              }
+              backend.register(ctx, username, password).then(
+                ()=>{ctx.messageApi.info("登录成功");},
+                ({message})=>{},
+              )
+            }}
+          >
+            注册
+          </Button>
+        </Col>
         <Col span={5}/>
       </Row>
   </>)
