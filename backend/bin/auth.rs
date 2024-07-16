@@ -48,7 +48,7 @@ async fn register (
     if ua.username.is_empty() 
         {return Err(InvalidUser)}
     if ua.password.len()<8 
-        {return Err(InvalidPwd);}
+        {return Err(PwdTooShort);}
     ctx.register(&id, &ua.username, &ua.password)?;
     Err(OK)
 }

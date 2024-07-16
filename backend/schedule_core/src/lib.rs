@@ -90,7 +90,9 @@ impl Schedule{
         if !self.db.contains_task(task.id)? {
             return Err(Error::TaskNotFound(task.id));
         }
-        let oldtask = self.db.insert_task(task)?.unwrap();
+        let Some(oldtask) = self.db.insert_task(task)? else {
+            return Err(Error::TaskNotFound(task.id));
+        };
         if oldtask.category != task.category {
             self.category_dec(&oldtask.category);
             self.category_inc(&task.category);
@@ -170,9 +172,7 @@ mod tests{
         let t = schedule.tasks().next().unwrap()?;
         assert_eq!(&t.title, &task.title);
         let mut it = schedule.tasks_filtered(Filter{
-            date: None,
-            from: None,
-            to: date,
+            date: date,
             category: None,
             priorities: Some(vec![task::Priority::Default]),
         });

@@ -48,7 +48,7 @@ impl Ctx {
             },
             Some(s) =>  {
                 if !s.value().password_verify(password)? {
-                    return Err(InvalidPwd);
+                    return Err(Core(sccore::Error::IncorrectPassword));
                 }
                 s.value().clone()
             }

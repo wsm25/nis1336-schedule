@@ -30,6 +30,7 @@ impl std::fmt::Display for Error {
             UserNotExist=>write!(f, "user does not exist"),
             TaskNotFound(id)=>write!(f, "task id {id} does not exist"),
             TaskExists(id)=>write!(f, "task {id} already exists"),
+            IncorrectPassword=>write!(f, "password incorrect"),
             _ => write!(f, "internal error `{self:?}`"),
         }
     }

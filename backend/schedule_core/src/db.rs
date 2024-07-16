@@ -67,7 +67,7 @@ impl Db {
         if let Some(raw) = self.tasks.insert(
             task.id.to_be_bytes(), 
             bincode::serialize(task)?,
-        )? {Ok(bincode::deserialize(&raw)?)}
+        )? {Ok(Some(bincode::deserialize(&raw)?))}
         else {Ok(None)}
     }
     pub fn iter_tasks(&self)->impl Iterator<Item = Result<Task>>{

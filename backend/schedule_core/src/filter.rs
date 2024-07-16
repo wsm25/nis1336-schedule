@@ -4,15 +4,17 @@ use crate::task::*;
 #[derive(serde::Serialize, serde::Deserialize)]
 pub struct Filter {
     pub date: Option<NaiveDate>,
-    pub from: Option<NaiveDate>,
-    pub to: Option<NaiveDate>,
+    // pub from: Option<NaiveDate>,
+    // pub to: Option<NaiveDate>,
     pub category: Option<String>,
     pub priorities: Option<Vec<Priority>>,
 }
 
 impl Filter {
     pub fn matches(&self, task: &Task)->bool {
-        if self.date!=task.date {return false;}
+        if self.date.is_some() {
+            if self.date!=task.date {return false;}
+        }
         // check date range
 
         // todo: bug: fix from,to 
@@ -29,9 +31,12 @@ impl Filter {
             },
         };
         */
-        if self.category!=task.category {return false;}
+        if self.category.is_some() {
+            if self.category!=task.category {return false;}
+        }
+            
         if let Some(ps) = &self.priorities {
-            if !ps.contains(&task.priority) {return false;}
+            if !ps.is_empty() && !ps.contains(&task.priority) {return false;}
         }
         true
     }

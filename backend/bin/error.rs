@@ -5,7 +5,7 @@ pub enum Error{
     BadCookie,
     AlreadyLogin,
     InvalidUser,
-    InvalidPwd,
+    PwdTooShort,
     Unauthorized,
 }
 pub type Result<T> = std::result::Result<T, Error>;
@@ -19,11 +19,11 @@ impl axum::response::IntoResponse for Error {
             OK => StatusCode::OK,
             Core(e) => match e {
                 UserNotExist | TaskNotFound(_) => StatusCode::NOT_FOUND,
-                UserExists | TaskExists(_) => StatusCode::BAD_REQUEST,
+                UserExists | TaskExists(_) => StatusCode::FORBIDDEN,
                 _ => StatusCode::INTERNAL_SERVER_ERROR,
             },
-            AlreadyLogin => StatusCode::FORBIDDEN,
-            BadCookie | InvalidPwd | InvalidUser => StatusCode::BAD_REQUEST,
+            AlreadyLogin | InvalidUser | PwdTooShort => StatusCode::FORBIDDEN,
+            BadCookie  => StatusCode::BAD_REQUEST,
             Unauthorized => StatusCode::UNAUTHORIZED,
             // _ => StatusCode::INTERNAL_SERVER_ERROR,
         };
@@ -46,7 +46,7 @@ impl std::fmt::Display for Error {
             Core(e) => write!(f, "{e}"),
             BadCookie => write!(f, "bad cookie"),
             AlreadyLogin => write!(f, "already logged in"),
-            InvalidPwd => write!(f, "password must contains more than 8 characters"),
+            PwdTooShort => write!(f, "password must contains more than 8 characters"),
             InvalidUser => write!(f, "invalid user name"),
             Unauthorized => write!(f, "authorization is required"),
         }
