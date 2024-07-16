@@ -15,15 +15,17 @@ impl Schedule{
     // user related
     pub fn login(username: &str, password: &str)->Result<Self> {
         let db = db::Db::open(username)?;
-        let user = db.user().unwrap();
+        let user = db.user()?;
         if !user.verify_password(password) {
             return Err(Error::IncorrectPassword);
         }
         let mut cats=BTreeMap::new();
         for task in db.iter_tasks(){
-            cats.entry(task?.category)
-                .and_modify(|curr| *curr += 1)
-                .or_insert(1);
+            if let Some(cat) = task?.category{
+                cats.entry(cat)
+                    .and_modify(|curr| *curr += 1)
+                    .or_insert(1);
+            }
         }
         Ok(Self{db, cats: Arc::new(RwLock::new(cats))})
     }
@@ -52,14 +54,16 @@ impl Schedule{
     pub fn categories(&self)->Vec<String>
         {self.cats.read().unwrap().keys().cloned().collect()}
     
-    fn category_inc(&self, cat: &String) {
+    fn category_inc(&self, cat: &Option<String>) {
+        let Some(cat) = cat else {return;};
         let mut cats = self.cats.write().unwrap();
         cats.entry(cat.to_string())
             .and_modify(|curr| *curr += 1)
             .or_insert(1);
     }
 
-    fn category_dec(&self, cat: &String) {
+    fn category_dec(&self, cat: &Option<String>) {
+        let Some(cat) = cat else {return;};
         let mut cats = self.cats.write().unwrap();
         if let Some(count) = cats.get_mut(cat){
             if *count==1 {cats.remove(cat);}
@@ -133,30 +137,29 @@ mod tests{
         create_dir(path).unwrap();
         Ok(())
     }
+    
     #[test]
     fn test_lib() -> R<()>{
         bootstrap()?;
         let schedule = Schedule::register("wsm", "114514")?;
-        let date =  NaiveDate::from_ymd_opt(1919, 8, 10).unwrap();
+        let date =  NaiveDate::from_ymd_opt(1919, 8, 10);
+        let date2 =  NaiveDate::from_ymd_opt(1919, 8, 11);
         let task = Task{
             id:schedule.generate_id()?,
             title: "结城友奈".into(),
             content: "是勇者".into(),
-            time: NaiveTime::from_hms_opt(11, 45, 14).unwrap(),
-            lop: task::Loop::OneOff{date},
-            notice: 0,
-            category: "10".into(),
+            time: NaiveTime::from_hms_opt(11,45,14),
+            date,
+            category: Some("10".into()),
             priority: task::Priority::Default,
         };
-        let date2 =  NaiveDate::from_ymd_opt(1919, 8, 11).unwrap();
         let task2 = Task{
             id: schedule.generate_id()?,
             title: "結城友奈".into(),
             content: "は勇者である".into(),
-            time: NaiveTime::from_hms_opt(11, 45, 14).unwrap(),
-            lop: task::Loop::OneOff{date:date2},
-            notice: 0,
-            category: "10".into(),
+            time: NaiveTime::from_hms_opt(11,45,14),
+            date: date2,
+            category: Some("10".into()),
             priority: task::Priority::Default,
         };
         schedule.task_insert(&task)?;
@@ -169,7 +172,7 @@ mod tests{
         let mut it = schedule.tasks_filtered(Filter{
             date: None,
             from: None,
-            to: Some(date),
+            to: date,
             category: None,
             priorities: Some(vec![task::Priority::Default]),
         });

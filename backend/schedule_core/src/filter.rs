@@ -12,11 +12,12 @@ pub struct Filter {
 
 impl Filter {
     pub fn matches(&self, task: &Task)->bool {
-        if let Some(date)=self.date{
-            if !task.lop.matches(date) {return false;}
-        }
+        if self.date!=task.date {return false;}
         // check date range
-        let from=match self.from{
+
+        // todo: bug: fix from,to 
+        /*
+        let from=match self.from {
             None => Some(task.lop.next()),
             Some(d) => task.lop.next_since(d),
         };
@@ -27,9 +28,8 @@ impl Filter {
                 Some(d_to) => if d_from>d_to {return false;}
             },
         };
-        if let Some(c)=&self.category {
-            if c!=&task.category {return false;}
-        }
+        */
+        if self.category!=task.category {return false;}
         if let Some(ps) = &self.priorities {
             if !ps.contains(&task.priority) {return false;}
         }

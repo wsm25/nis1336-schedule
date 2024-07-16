@@ -13,9 +13,11 @@ use crate::{
 };
 
 pub fn router(ctx: Ctx)->axum::Router {
+    // todo: logout
     axum::Router::new()
         .route("/login", post(login))
         .route("/register", post(register))
+        // todo: cors layer
         .with_state(ctx)
 }
 

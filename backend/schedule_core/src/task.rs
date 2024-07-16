@@ -4,15 +4,14 @@ pub struct Task {
     pub id: u64,
     pub title: String,
     pub content: String,
-    pub time: NaiveTime,
-    pub lop:  Loop,
-    pub notice: u32, // how many minutes before
-    pub category: String, // "" is default
+    pub time: Option<NaiveTime>, // set: notice
+    pub date: Option<NaiveDate>, // unset: notice everyday
+    pub category: Option<String>, // None is default
     pub priority: Priority, // Default is default
     // status: Status,
 }
 
-use chrono::{Datelike, NaiveDate, NaiveTime, Weekday, Days};
+use chrono::{Datelike, Days, NaiveDate, NaiveTime, Weekday};
 
 #[derive(serde::Serialize, serde::Deserialize, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
@@ -39,7 +38,7 @@ impl Loop {
                 ld.checked_add_days(
                     Days::new(7-ld.weekday().days_since(wd) as u64)
                 ).unwrap(),
-            Everyday{date:ld} => ld.checked_add_days(Days::new(1)).unwrap()
+            Everyday{date:ld} => ld
         }
     }
     pub fn next_since(&self, date: NaiveDate)->Option<NaiveDate> {

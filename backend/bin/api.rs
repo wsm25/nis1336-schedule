@@ -1,21 +1,21 @@
 use axum::{
     extract::{Extension, Path, Request, State}, 
-    routing::{get, post, put, delete}, 
+    routing::{get, post, put, delete, patch}, 
     Json,
     response::Response,
     middleware::{Next, from_fn_with_state},
 };
 use sccore::{Schedule, task::*};
 use crate::{ctx::Ctx, error::{Result, Error::*}, session::SessionID};
-use chrono::NaiveTime;
+use chrono::{NaiveDate, NaiveTime};
 
 pub fn router(ctx: Ctx)->axum::Router {
     axum::Router::new()
-    .route("/categories", get(categories))
+    .route("/user", get(user))
     .route("/tasks", post(get_tasks))
     .route("/task", put(insert_task))
     .route("/task/:id", get(get_task))
-    .route("/task/:id", put(put_task))
+    .route("/task/:id", patch(patch_task))
     .route("/task/:id", delete(delete_task))
     .route_layer(from_fn_with_state(ctx.clone(), auth))
     .with_state(ctx)
@@ -24,14 +24,17 @@ pub fn router(ctx: Ctx)->axum::Router {
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
-struct Cats {names: Vec<String>}
+struct User {
+    categories: Vec<String>
+}
 
-async fn categories (
+// user info
+async fn user (
     Extension(schedule): Extension<Schedule>,
-) -> Result<Json<Cats>> 
+) -> Result<Json<User>> 
 {
-    Ok(Json(Cats{
-        names: schedule.categories()
+    Ok(Json(User{
+        categories: schedule.categories()
     }))
 }
 
@@ -40,10 +43,9 @@ async fn categories (
 #[derive(Deserialize)]
 struct NewTaskReq {
     pub title: String, // required
-    pub content: String, // required
-    pub time: NaiveTime, // required
-    pub lop:  Loop, // required
-    pub notice: Option<u32>, // default: 0
+    pub content: Option<String>,
+    pub time: Option<NaiveTime>,
+    pub date: Option<NaiveDate>,
     pub category: Option<String>, // default: ""
     pub priority: Option<Priority>, // default: Default
     // status: Option<Status>,
@@ -57,8 +59,7 @@ struct ModTask {
     pub title: Option<String>,
     pub content: Option<String>,
     pub time: Option<NaiveTime>,
-    pub lop:  Option<Loop>,
-    pub notice: Option<u32>, // how many minutes before
+    pub date: Option<NaiveDate>,
     pub category: Option<String>, // "" is default
     pub priority: Option<Priority>, // Default is default
     // status: Option<Status>,
@@ -81,17 +82,16 @@ async fn insert_task (
     schedule.task_insert(&Task{ 
         id,
         title: task.title, 
-        content: task.content, 
+        content: task.content.unwrap_or("".to_string()), 
         time: task.time, 
-        lop: task.lop, 
-        notice: task.notice.unwrap_or(0), 
-        category: task.category.unwrap_or("".to_string()), 
+        date: task.date,
+        category: task.category, 
         priority: task.priority.unwrap_or(Priority::Default) 
     })?;
     Ok(Json(NewTaskRep{id}))
 }
 
-async fn put_task (
+async fn patch_task (
     Extension(schedule): Extension<Schedule>,
     Path(id): Path<u64>,
     Json(modtask): Json<ModTask>,
@@ -102,10 +102,9 @@ async fn put_task (
         id: task.id,
         title: modtask.title.unwrap_or(task.title),
         content: modtask.content.unwrap_or(task.content),
-        time: modtask.time.unwrap_or(task.time),
-        lop: modtask.lop.unwrap_or(task.lop),
-        notice: modtask.notice.unwrap_or(task.notice),
-        category: modtask.category.unwrap_or(task.category),
+        time: modtask.time,
+        date: modtask.date,
+        category: modtask.category,
         priority: modtask.priority.unwrap_or(task.priority),
     };
     schedule.task_modify(&task)?;
@@ -143,15 +142,17 @@ async fn get_tasks (
         Ok(t)=>Some(t),
         Err(_) => None,
     };
-    Ok(Json(
-        GetTasksResp{
-            tasks: match filter.filter {
-                None => schedule.tasks()
-                    .filter_map(f).collect(),
-                Some(filter) => schedule.tasks_filtered(filter)
-                    .filter_map(f).collect(),
-            }
-    }))
+    let tasks:Vec<_> = match filter.filter {
+        None => schedule.tasks()
+            .filter_map(f).collect(),
+        Some(filter) => schedule.tasks_filtered(filter)
+            .filter_map(f).collect(),
+    };
+    // todo: sort
+    /*
+    tasks.sort_by_key(|a| chrono::NaiveDateTime::new(a.lop.next(), a.time));
+    */
+    Ok(Json(GetTasksResp{tasks}))
 }
 
 /// middleware that authenticate id and inserts its schedule

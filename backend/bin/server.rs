@@ -34,9 +34,9 @@ async fn main() {
 
 async fn fallback(_req: Request) -> Response {
     (
-        StatusCode::NOT_FOUND,  
+        StatusCode::NOT_FOUND, 
         [(CONTENT_TYPE, "application/json")],
-        r#"{"message":"invalid uri"}"#,
+        r#"{"message":"not found"}"#,
     ).into_response()
 }
 
