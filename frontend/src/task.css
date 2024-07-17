@@ -22,7 +22,8 @@
 #schedule-task-title-box {
     border: none;
     outline: none; 
-    height: 48px;
+    min-height: 48px;
+    width: 100%;
     font-size: x-large;
 }
 

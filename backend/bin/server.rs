@@ -27,7 +27,8 @@ async fn main() {
         .layer(from_fn(tracer))
         ;
     
-    let listener = tokio::net::TcpListener::bind("localhost:8080").await.unwrap();
+    let port:u16 = std::env::var("SCHEDULE_PORT").map(|s| s.parse().unwrap_or(8080)).unwrap_or(8080);
+    let listener = tokio::net::TcpListener::bind(("localhost", port)).await.unwrap();
     info!("Server start");
     axum::serve(listener, app).await.unwrap();
 }

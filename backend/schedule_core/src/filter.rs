@@ -1,7 +1,7 @@
 use chrono::NaiveDate;
 use crate::task::*;
 
-#[derive(serde::Serialize, serde::Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Clone)]
 pub struct Filter {
     pub date: Option<NaiveDate>,
     // pub from: Option<NaiveDate>,

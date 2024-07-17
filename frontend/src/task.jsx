@@ -2,7 +2,7 @@
 /// Will automatically save if editted and no action in 10s;
 /// or exiting the page.
 
-import { Checkbox, Divider, DatePicker, Button, AutoComplete, Input, TimePicker, Dropdown, Space } from 'antd';
+import { Checkbox, Divider, DatePicker, Button, AutoComplete, Input, TimePicker, Dropdown, Space, Popconfirm } from 'antd';
 import './task.css'
 import { pris } from './backend'
 import { priFlags, priColor } from './design';
@@ -53,35 +53,38 @@ const Task = ({ctx}) => {
   };
   return (<>
     <div id="schedule-task-meta"  key={"taskdetail"+task.id}>
-        <Checkbox 
-          onClick={()=>{
-            ctx.delTask(task);
-            ctx.setCurrentTask(undefined);
-          }}
-          className={"checkbox-"+task.priority}
-        />
-        <Divider type="vertical" />
-        <DatePicker 
-          onChange={(_, date)=>{
-            task.date= date=="" ? undefined : date;
-            ctx.setCurrentTask(task);
-            ctx.modTaskLazy(task);
-          }} 
-          defaultValue={task.date?dayjs(task.date):undefined}
-        />
-        <Divider type="vertical" />
-        <TimePicker  
-          onChange={(_, time)=>{
-            task.time= time=="" ? undefined : time;
-            ctx.setCurrentTask(task);
-            ctx.modTaskLazy(task);
-          }}
-          defaultValue={task.time?dayjs(task.time, "HH:mm:ss"):undefined}
-        />
-        <Divider type="vertical" />
-        <Dropdown menu={{items: priItems}}>
-          <Button icon={priFlags[ctx.currentTask.priority]}></Button>
-        </Dropdown>
+      <Popconfirm
+        title="删除任务"
+        description="确认要删除此任务吗？"
+        onConfirm={()=>{
+          ctx.delTask(task);
+          ctx.setCurrentTask(undefined);
+        }}
+      >
+        <Checkbox className={"checkbox-"+task.priority} checked={false} title="删除任务"/>
+      </Popconfirm>
+      <Divider type="vertical" />
+      <DatePicker 
+        onChange={(_, date)=>{
+          task.date= date=="" ? undefined : date;
+          ctx.setCurrentTask(task);
+          ctx.modTaskLazy(task);
+        }} 
+        defaultValue={task.date?dayjs(task.date):undefined}
+      />
+      <Divider type="vertical" />
+      <TimePicker  
+        onChange={(_, time)=>{
+          task.time= time=="" ? undefined : time;
+          ctx.setCurrentTask(task);
+          ctx.modTaskLazy(task);
+        }}
+        defaultValue={task.time?dayjs(task.time, "HH:mm:ss"):undefined}
+      />
+      <Divider type="vertical" />
+      <Dropdown menu={{items: priItems}}>
+        <Button icon={priFlags[ctx.currentTask.priority]}></Button>
+      </Dropdown>
     </div>
     <Divider/>
     <div id="schedule-task-title">
@@ -101,7 +104,7 @@ const Task = ({ctx}) => {
       <AutoComplete key={"taskdetail"+task.id} options={cats} defaultValue={task.category} >
         <Input 
           prefix={<UnorderedListOutlined/>}
-          placeholder="类型" 
+          placeholder="分类" 
           defaultValue={task.category}
           onKeyDown={(e)=>{if(e.key==='Enter') submitCat(e.target.value);}}
         />

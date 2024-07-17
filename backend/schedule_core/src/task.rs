@@ -13,6 +13,7 @@ pub struct Task {
 
 use chrono::{Datelike, Days, NaiveDate, NaiveTime, Weekday};
 
+// todo: loop logic
 #[derive(serde::Serialize, serde::Deserialize, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum Loop {
@@ -56,7 +57,7 @@ impl Loop {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, PartialEq, Clone, Copy)]
 #[serde(rename_all = "lowercase")]
 pub enum Priority {
     Default,

@@ -2,9 +2,9 @@ import { useState, memo } from 'react'
 import { 
   Skeleton, Button, Dropdown, 
   DatePicker, Space, Select, 
-  Input, List, Checkbox, 
-  message, } from 'antd'
-import { UnorderedListOutlined, CloseOutlined } from '@ant-design/icons'
+  Input, List, Checkbox, Empty,
+  message, Popconfirm } from 'antd'
+import { UnorderedListOutlined, CloseOutlined, PlusOutlined } from '@ant-design/icons'
 import * as backend from './backend'
 
 import { pris } from './backend'
@@ -39,7 +39,7 @@ const FilterBar = ({ctx}) => {
       <Dropdown menu={{items :categoryitems}}>
         <Button type="text">
           <UnorderedListOutlined />
-          {cat ? <>{cat}<CloseOutlined onClick={()=>setCat(undefined)}/></> : "所有类型"}
+          {cat ? <>{cat}<CloseOutlined onClick={()=>setCat(undefined)}/></> : "所有分类"}
         </Button>
       </Dropdown>
 
@@ -66,16 +66,20 @@ const TasksList = ({ctx}) =>{
       className={ctx.currentTask ? (ctx.currentTask.id==task.id ? "task-selected task" : "task") : "task"}
     >
       <Space>
-        <Checkbox 
-          onClick={(e)=>{
-            if(ctx.currentTask && task.id==ctx.currentTask.id) {
+        <Popconfirm
+          title="删除任务"
+          description="确认要删除此任务吗？"
+          onConfirm={(e)=>{
+            if((ctx.currentTask) && (task.id==ctx.currentTask.id)) {
               ctx.setCurrentTask(undefined);
             }
             ctx.delTask(task);
             e.stopPropagation();
           }}
-          className={"checkbox-"+task.priority}
-        />
+          onClick={(e)=>{e.stopPropagation();}}
+        >
+          <Checkbox className={"checkbox-"+task.priority} checked={false} title="删除任务"/>
+        </Popconfirm>
         {task.title}
       </Space>
     </List.Item>
@@ -84,6 +88,7 @@ const TasksList = ({ctx}) =>{
     itemLayout="vertical"
     dataSource={ctx.tasks}
     bordered
+    locale={{emptyText: <Empty description="没有任务，放松一下~"/>}}
     renderItem={(task)=><TaskItem task={task}/>}
   />
 }
@@ -92,7 +97,8 @@ const TaskAdder = ({ctx}) => {
   var [newTitle, setNewTitle] = useState("");
   return (
     <Input 
-      placeholder="添加任务" 
+      prefix={<PlusOutlined style={{color: "#ccc"}}/>}
+      placeholder="添加任务，回车即可保存"
       style={{ height: "48px" }} 
       value={newTitle}
       onChange={(e)=>{setNewTitle(e.target.value)}}

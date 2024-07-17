@@ -14,7 +14,7 @@ impl User {
         }
     }
 
-    pub fn set_password(&mut self, password: &str) {
+    pub fn _set_password(&mut self, password: &str) {
         self.password_hash = Self::hash_password(password);
     }
 
@@ -38,7 +38,7 @@ mod test {
     fn test_pwd(){
         let mut user = User::new("wsm", "114514");
         assert!(user.verify_password("114514"));
-        user.set_password("1919810");
+        user._set_password("1919810");
         assert!(user.verify_password("1919810"));
     }
 }

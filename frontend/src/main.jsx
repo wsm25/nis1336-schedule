@@ -11,14 +11,14 @@ import * as backend from './backend'
 import './main.css'
 
 const App = function(){
-  console.log("[Hook] page rendering...")
+  // console.log("[Hook] page rendering...")
   // lazy load
   var [cats, setCats] = useState(()=>[]);
   var [tasks, setTasks] = useState(()=>undefined);
   var [currentTask, setCurrentTask] = useState(undefined);
   var [login, setLogin] = useState(true);
   var [filter, setFilter] = useState(new backend.Filter());
-  var lazysave = useMemo(()=>({task: undefined, timeout: undefined}));
+  var lazysave = useMemo(()=>({task: undefined, timeout: undefined}), []);
   const [messageApi, contextHolder] = message.useMessage();
   var ctx={
     cats, setCats, 
@@ -41,11 +41,14 @@ const App = function(){
       setTasks([...tasks]);
     },
     modTaskLazy: function(task){
-      console.log("modlazy!");
-      if(lazysave.task===task) 
+      if(lazysave.task===task) {
         clearTimeout(lazysave.timeout); // can be undefined
-      else lazysave.task=task;
+      }
+      else {
+        lazysave.task=task;
+      }
       lazysave.timeout=setTimeout(function(){
+        console.log("[lazy save] uploading...");
         backend.modTask(ctx, task);
         lazysave.timeout=undefined;
         lazysave.task=undefined;
@@ -58,9 +61,8 @@ const App = function(){
     addTask: function(title){
       backend.addTask(ctx, title).then(
         (task)=>{
-          console.log("add task", task);
           setCurrentTask(task);
-          setTasks([...tasks, task]);
+          this.superReload();
         },
       )
     }
@@ -69,7 +71,6 @@ const App = function(){
   useEffect(function(){
     backend.userinfo(ctx).then(function(info){
       ctx.setCats(info.categories);
-      console.log("cats:", info.categories);
       ctx.superReload();
     }, ()=>{});
   }, [])

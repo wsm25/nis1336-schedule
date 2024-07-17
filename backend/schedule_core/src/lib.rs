@@ -38,9 +38,10 @@ impl Schedule{
         })
     }
 
-    pub fn password_set(&self, password: &str)->Result<()> {
+    // unused
+    fn _password_set(&self, password: &str)->Result<()> {
         let mut user=self.db.user()?;
-        user.set_password(password);
+        user._set_password(password);
         self.db.set_user(&user)?;
         Ok(())
     }
@@ -128,22 +129,18 @@ pub mod error;
 mod tests{
     type R<T> = std::result::Result<T, Box<dyn std::error::Error>>;
     use chrono::{NaiveDate, NaiveTime};
-
+    use std::path::Path;
+    use std::fs::{remove_dir_all, create_dir};
     use super::*;
 
-    fn bootstrap() -> R<()>{
-        use std::path::Path;
-        use std::fs::{remove_dir_all, create_dir};
-        let path = Path::new("db/");
-        remove_dir_all(path).unwrap();
-        create_dir(path).unwrap();
-        Ok(())
-    }
-    
     #[test]
     fn test_lib() -> R<()>{
-        bootstrap()?;
+        // bootstrap
+        let path = Path::new("db/");
+        let _ = remove_dir_all(path);
+        create_dir(path)?;
         let schedule = Schedule::register("wsm", "114514")?;
+        // test data
         let date =  NaiveDate::from_ymd_opt(1919, 8, 10);
         let date2 =  NaiveDate::from_ymd_opt(1919, 8, 11);
         let task = Task{
@@ -155,7 +152,7 @@ mod tests{
             category: Some("10".into()),
             priority: task::Priority::Default,
         };
-        let task2 = Task{
+        let mut task2 = Task{
             id: schedule.generate_id()?,
             title: "結城友奈".into(),
             content: "は勇者である".into(),
@@ -164,6 +161,12 @@ mod tests{
             category: Some("10".into()),
             priority: task::Priority::Default,
         };
+        let filter = Filter{
+            date: date2,
+            category: None,
+            priorities: Some(vec![task::Priority::Default]),
+        };
+        // insert
         schedule.task_insert(&task)?;
         drop(schedule);
         let schedule = Schedule::login("wsm", "114514")?;
@@ -171,13 +174,18 @@ mod tests{
         assert_eq!(schedule.tasks().count(), 2);
         let t = schedule.tasks().next().unwrap()?;
         assert_eq!(&t.title, &task.title);
-        let mut it = schedule.tasks_filtered(Filter{
-            date: date,
-            category: None,
-            priorities: Some(vec![task::Priority::Default]),
-        });
-        assert_eq!(&it.next().unwrap()?.content, &task.content);
+        // filter
+        let mut it = schedule.tasks_filtered(filter.clone());
+        assert_eq!(&it.next().unwrap()?.content, &task2.content);
         assert!(&it.next().is_none());
+        // modify
+        task2.id=task.id;
+        schedule.task_modify(&task2)?;
+        assert_eq!(schedule.tasks_filtered(filter.clone()).count(), 2);
+        // delete
+        schedule.task_remove(task2.id)?;
+        assert_eq!(schedule.tasks().count(), 1);
+        remove_dir_all(path)?;
         Ok(())
     }
 }

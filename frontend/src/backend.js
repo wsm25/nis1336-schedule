@@ -45,6 +45,7 @@ function request(ctx, uri, method, data, onFinish){
                 ctx.messageApi.warning("未登录");
                 onFinish("未登录");
             } else {
+                console.log("[Schedule backend] Error:", xhr.responseText);
                 try { 
                     var message=JSON.parse(xhr.responseText).message;
                     ctx.messageApi.error("Error: "+message);
@@ -57,6 +58,7 @@ function request(ctx, uri, method, data, onFinish){
         }
       };
       xhr.onerror = function(_){
+        console.log("[Schedule backend] xhr error:", xhr.statusText);
         ctx.messageApi.error("Network error:", xhr.statusText);
         onFinish(xhr.statusText);
       };
