@@ -7,6 +7,7 @@ import ListEle from './list';
 import TaskEle from './task';
 import Auth from './auth';
 import * as backend from './backend'
+import Notice from './notice';
 
 import './main.css'
 
@@ -74,10 +75,12 @@ const App = function(){
       ctx.superReload();
     }, ()=>{});
   }, [])
+  // notice, REALLY POOR implement
   return (
     <React.StrictMode>
       <ConfigProvider locale={zhCN}>
         {contextHolder}
+        <Notice tasks={tasks}/>
         <Auth ctx={ctx}/>
         <div id="schedule-list"><ListEle ctx={ctx}/></div>
         <div id="schedule-divide"/>
