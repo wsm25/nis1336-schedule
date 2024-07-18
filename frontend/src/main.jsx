@@ -41,7 +41,7 @@ const App = function(){
     reload: function(){
       setTasks([...tasks]);
     },
-    modTaskLazy: function(task){
+    modTaskLazy: (task)=>{
       if(lazysave.task===task) {
         clearTimeout(lazysave.timeout); // can be undefined
       }
@@ -62,7 +62,6 @@ const App = function(){
     addTask: function(title){
       backend.addTask(ctx, title).then(
         (task)=>{
-          setCurrentTask(task);
           this.superReload();
         },
       )
@@ -80,7 +79,7 @@ const App = function(){
     <React.StrictMode>
       <ConfigProvider locale={zhCN}>
         {contextHolder}
-        <Notice tasks={ctx.tasks}/>
+        <Notice tasks={tasks}/>
         <Auth ctx={ctx}/>
         <div id="schedule-list"><ListEle ctx={ctx}/></div>
         <div id="schedule-divide"/>
