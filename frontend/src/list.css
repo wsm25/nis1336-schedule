@@ -8,6 +8,8 @@
 
 #schedule-task-list {
     padding: 8px 32px;
+    flex: auto;
+    overflow-y: scroll;
 }
 
 .task-selected {

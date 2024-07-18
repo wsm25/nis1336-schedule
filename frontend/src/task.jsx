@@ -68,16 +68,17 @@ const Task = ({ctx}) => {
         onChange={(_, date)=>{
           task.date= date=="" ? undefined : date;
           ctx.setCurrentTask(task);
-          ctx.modTaskLazy(task);
+          ctx.modTask(task);
         }} 
         defaultValue={task.date?dayjs(task.date):undefined}
       />
       <Divider type="vertical" />
       <TimePicker  
         onChange={(_, time)=>{
-          task.time= time=="" ? undefined : time;
+          task.time= (time=="" ? undefined : time);
+          console.log("set time", task.time);
           ctx.setCurrentTask(task);
-          ctx.modTaskLazy(task);
+          ctx.modTask(task);
         }}
         defaultValue={task.time?dayjs(task.time, "HH:mm:ss"):undefined}
       />

@@ -85,12 +85,12 @@ const TasksList = ({ctx}) =>{
     </List.Item>
   );});
   return <List
-    itemLayout="vertical"
-    dataSource={ctx.tasks}
-    bordered
-    locale={{emptyText: <Empty description="没有任务，放松一下~"/>}}
-    renderItem={(task)=><TaskItem task={task}/>}
-  />
+      itemLayout="vertical"
+      dataSource={ctx.tasks}
+      bordered
+      locale={{emptyText: <Empty description="没有任务，放松一下~"/>}}
+      renderItem={(task)=><TaskItem task={task}/>}
+    />
 }
 
 const TaskAdder = ({ctx}) => {

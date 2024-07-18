@@ -49,7 +49,7 @@ const App = function(){
         lazysave.task=task;
       }
       lazysave.timeout=setTimeout(function(){
-        console.log("[lazy save] uploading...");
+        // console.log("[lazy save] uploading...");
         backend.modTask(ctx, task);
         lazysave.timeout=undefined;
         lazysave.task=undefined;
@@ -69,8 +69,8 @@ const App = function(){
     }
   };
   // init
-  useEffect(function(){
-    backend.userinfo(ctx).then(function(info){
+  useEffect(()=>{
+    backend.userinfo(ctx).then((info)=>{
       ctx.setCats(info.categories);
       ctx.superReload();
     }, ()=>{});
@@ -80,7 +80,7 @@ const App = function(){
     <React.StrictMode>
       <ConfigProvider locale={zhCN}>
         {contextHolder}
-        <Notice tasks={tasks}/>
+        <Notice tasks={ctx.tasks}/>
         <Auth ctx={ctx}/>
         <div id="schedule-list"><ListEle ctx={ctx}/></div>
         <div id="schedule-divide"/>
